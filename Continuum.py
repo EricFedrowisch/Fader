@@ -14,15 +14,47 @@ class Continuum():
         self.time_jaunt_length = 25 # How many turns max can you go back to from LEP
         self.leadingTurn = 0
 
-    def state(self):
-        print str(self.focalTimeframe) + " turns from LEP.", "Current turn is " \
-        + str(self.timeframes[self.focalTimeframe].turn)
+    def state(self, verbose = False):
+        if not verbose:
+            print "| " + str(self.focalTimeframe) \
+            + " turns from LEP. ", "| Current turn is " \
+            + str(self.timeframes[self.focalTimeframe].turn)
+        else:
+            print "| " + str(self.focalTimeframe) \
+            + " turns from LEP. ", "| Current turn is " \
+            + str(self.timeframes[self.focalTimeframe].turn)\
+            + " | Time advancing? " +  str(self.advance_time) + "\n| Continuum so far: " \
+            +  str(self.turnContents())
 
     def turnContents(self):
         turns = []
         for t in self.timeframes:
             turns.append(t.turn)
         return turns
+
+    def inBounds(self, turns):
+        n = turns + self.focalTimeframe
+        return n >= 0 and n < len(self.timeframes)
+
+    def travelBack(self, turns):
+        print "Trying travel back " + str(turns) + " turns."
+        if self.inBounds(turns):
+            self.advance_time = False
+            self.focalTimeframe += turns
+        else:
+            print "Travel back failed. Out of bounds."
+
+    def travelForward(self, turns):
+        print "Trying travel forward " + str(turns) + " turns."
+        if self.inBounds(turns * -1):
+            self.focalTimeframe -= turns
+            if self.focalTimeframe > 0:
+                self.advance_time = False
+            elif self.focalTimeframe == 0:
+                self.advance_time = True
+        else:
+            print "Travel forward failed. Out of bounds."
+
 
     def nextTurn(self):
         if self.advance_time: # If focalTimeframe is at LEP...
@@ -71,29 +103,16 @@ if __name__ == '__main__':
     c = Continuum()
     t1 = Timeframe(c, 0)
     c.timeframes.append(t1)
-    print "Initial turns in Continuum:", c.turnContents()
-    c.state()
+    c.state(verbose = True)
     print "#####After advancing 30 turns...######"
     for i in range(0,30):
         c.nextTurn()
-    print c.turnContents()
-    print("###### Go back 5 turns #######")
-    c.focalTimeframe += 5
-    c.advance_time = False
-    for i in range(0,3):
-        c.state()
-        c.nextTurn()
-    print "Continuum so far:", c.turnContents()
-    print "Time advancing?", c.advance_time
-    print("###### Go forward 3 turns #######")
-    c.focalTimeframe -= 3
+    c.state(verbose = True)
+    '''
     for i in range(0,5):
         c.state()
         c.nextTurn()
-    print "Continuum so far:", c.turnContents()
-    print "Time advancing?", c.advance_time
     for i in range(0,10):
         c.state()
         c.nextTurn()
-    print "Continuum so far:", c.turnContents()
-    print "Time advancing?", c.advance_time
+    '''
