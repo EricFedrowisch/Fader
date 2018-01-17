@@ -6,6 +6,8 @@
 # Jan. 14, 2018: Got one backward hop then resuming forward flow to work.
 # Jan. 14, 2018: Got multiple backwards hops to work. Forward too.
 
+import libtcodpy as libtcod
+
 # Container class for timeframes
 class Continuum():
     def __init__(self, zone = None):
@@ -103,10 +105,18 @@ class Zone():
             for x in range(0, xSize):
                 self.zoneMap.append(Tile(x, y))
 
-class Tile():
-    def __init__(self, x, y):
+class Object():
+    def __init__(self, x, y, char = '.', color = libtcod.lightest_grey):
         self.x, self.y = x, y
+        self.char = char
+        self.color = color
+
+class Tile(Object):
+    def __init__(self, x, y, char = '.', color = libtcod.lightest_grey):
+        Object.__init__(self, x, y, char, color)
         self.contents = []
+        self.explored = False
+
 
 # Exercise
 if __name__ == '__main__':
