@@ -12,7 +12,6 @@ class game():
         #Initialize Continuum
         zone = continuum.Zone()
         self.continuum = continuum.Continuum(zone)
-        self.targetTimeframe = self.focalTimeframe
         # Initialize Console
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         self.con  = libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, False)
@@ -30,7 +29,7 @@ class game():
         return self.continuum.timeframes[self.focalTimeframe].turn
     @property
     def targetTurn(self):
-        return self.continuum.timeframes[self.targetTimeframe].turn
+        return self.continuum.timeframes[self.continuum.targetTimeframe].turn
     @property
     def zone(self):
         return self.timeframe.zone.zoneMap
@@ -43,20 +42,7 @@ class game():
         print "Thanks for playing!"
 
     def nextTurn(self):
-        if self.targetTimeframe != self.focalTimeframe:
-            # Travel Forwards
-            if self.targetTimeframe < self.focalTimeframe:
-                t = abs(self.targetTimeframe - self.focalTimeframe)
-                self.continuum.travelForward(t)
-            # Travel Backwards
-            elif self.targetTimeframe > self.focalTimeframe:
-                t = (self.targetTimeframe - self.focalTimeframe)
-                self.continuum.travelBack(t)
-            self.targetTimeframe = self.focalTimeframe
-        else:
-            self.continuum.nextTurn() # Messy execution here w/ double next Turn
-
-
+        self.continuum.nextTurn()
 
     def draw(self):
         libtcod.console_clear(self.con) #Clear console
@@ -69,25 +55,10 @@ class game():
         turn += "Focal Timeframe: " + str(self.focalTurn) + ' '
         turn += "Target Timeframe: " + str(self.targetTurn)
         self.con_print(string = turn)
-        self.drawTimeline()
+        self.con_print(y=(SCREEN_HEIGHT-2), string = self.continuum.timeline())
+        self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
+        self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
 
-    def drawTimeline(self):
-        tLen = len(self.continuum.timeframes)
-        timeBar = list('')
-        print
-        for i in range(0,tLen):
-            timeBar.append('o')
-        if tLen < 25:
-            for i in range(len(timeBar),25):
-                timeBar.append('.')
-        timeBar[self.focalTimeframe] = '@'
-        if self.targetTimeframe != self.focalTimeframe:
-            timeBar[self.targetTimeframe] = 'X'
-        timeBar = timeBar[::-1] # Reverse timeBar
-        timeBar.insert(0,'Time Gauge: (|')
-        timeBar.append('|)')
-        timeBar = "".join(timeBar)
-        self.con_print(y=(SCREEN_HEIGHT-2), string = timeBar)
 
     def drawMap(self):
         for tile in self.zone:
@@ -105,11 +76,6 @@ class game():
             if x >= (SCREEN_WIDTH - 1): #Really simplistic word wrap
                 x,y = 0, y+1
 
-    def changeTargetTimeframe(self, amount):
-        target = self.targetTimeframe + amount
-        if self.continuum.inBounds(target):
-            self.targetTimeframe = target
-
     def handle_keys(self):
         turnTaken = False
 
@@ -126,9 +92,9 @@ class game():
             turnTaken = True
         elif key.vk == libtcod.KEY_CHAR:
             if key.c == ord('q') or key.c == ord('Q'):
-                self.changeTargetTimeframe(amount=1)
+                self.continuum.changeTargetTimeframe(amount=1)
             elif key.c == ord('e') or key.c == ord('E'):
-                self.changeTargetTimeframe(amount=-1)
+                self.continuum.changeTargetTimeframe(amount=-1)
             elif key.c == ord('i') or key.c == ord('I'):
                 self.continuum.state(verbose = True)
             '''
