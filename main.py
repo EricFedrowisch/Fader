@@ -38,11 +38,8 @@ class game():
         while not libtcod.console_is_window_closed() and self.exit != True:
             self.draw()
             if (self.handle_keys()): #If player took turn
-                self.nextTurn()
+                self.continuum.nextTurn()
         print "Thanks for playing!"
-
-    def nextTurn(self):
-        self.continuum.nextTurn()
 
     def draw(self):
         libtcod.console_clear(self.con) #Clear console
@@ -92,9 +89,9 @@ class game():
             turnTaken = True
         elif key.vk == libtcod.KEY_CHAR:
             if key.c == ord('q') or key.c == ord('Q'):
-                self.continuum.changeTargetTimeframe(amount=1)
+                self.continuum.changeTargetTimeframe(1)
             elif key.c == ord('e') or key.c == ord('E'):
-                self.continuum.changeTargetTimeframe(amount=-1)
+                self.continuum.changeTargetTimeframe(-1)
             elif key.c == ord('i') or key.c == ord('I'):
                 self.continuum.state(verbose = True)
             '''
