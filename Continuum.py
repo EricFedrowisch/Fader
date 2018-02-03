@@ -35,10 +35,10 @@ class Continuum():
             self.focalTimeframe -= 1
         self.targetTimeframe = self.focalTimeframe
 
-    def indexInBounds(self, turns):
-        n = turns + self.focalTimeframe
+    def indexInBounds(self, turn):
+        #n = turns + self.focalTimeframe
         #print "Inbounds Check: n = ", n, n >= 0 and n < len(self.timeframes), "Turns = ", turns
-        return n >= 0 and n < len(self.timeframes)
+        return turn >= 0 and turn < len(self.timeframes)
 
     def changeTargetTimeframe(self, amount):
         target = self.targetTimeframe + amount
