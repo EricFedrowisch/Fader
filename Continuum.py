@@ -18,11 +18,9 @@ class Continuum():
     def nextTurn(self):
         self.timeframes[self.focalTimeframe].play()
         if self.targetTimeframe != self.focalTimeframe:
-            t = self.targetTimeframe - self.focalTimeframe
-            if self.targetTimeframe < self.focalTimeframe:
-                self.travel(-t) # Travel Forwards
-            elif self.targetTimeframe > self.focalTimeframe:
-                self.travel(t) # Travel Backwards
+            self.focalTimeframe = self.targetTimeframe
+            self.targetTimeframe = self.focalTimeframe
+            return
 
         if self.focalTimeframe == 0: # If focalTimeframe is at LEP...
             # Time moves forward from leading edge of present
@@ -44,12 +42,6 @@ class Continuum():
         target = self.targetTimeframe + amount
         if self.indexInBounds(target):
             self.targetTimeframe = target
-        print "Change target:", target
-
-    def travel(self, turns):
-        #print "### Trying to travel " + str(turns) + " turns. ###"
-        if self.indexInBounds(turns):
-            self.focalTimeframe += turns
 
     def timeline(self):
         tLen = len(self.timeframes)
