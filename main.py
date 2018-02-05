@@ -61,8 +61,8 @@ class game():
 
     def drawMap(self):
         for tile in self.zone:
-            libtcod.console_set_default_foreground(self.con, tile.color)
-            libtcod.console_put_char(self.con, tile.x, tile.y, tile.char, libtcod.BKGND_NONE)
+            libtcod.console_set_default_foreground(self.con, tile.visual.color)
+            libtcod.console_put_char(self.con, tile.x, tile.y, tile.char, tile.back)
 
     def con_print(self, x = 0, y=(SCREEN_HEIGHT-1), string = '', Color = None):
         if Color:

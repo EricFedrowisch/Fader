@@ -81,10 +81,9 @@ class Continuum():
 class Timeframe():
     def __init__(self, Continuum, turn, PreviousFrame = None):
         self.turn = turn
-        self.zoneStart = None
-        self.zoneEnd = None
+        self.zone = None
         if PreviousFrame:
-            self.zoneStart = PreviousFrame.zoneEnd
+            self.zone = PreviousFrame.zone
         self.eventQueue = []
     def play(self):
         # Play/Replay turn, noting any changes, checking for collisons/paradoxes
@@ -114,22 +113,55 @@ class Player():
         self.position = Position(x, y)
         self.visual = Visual(char = "@", color = libtcod.red)
         self.timeClone = timeClone
+    @property
+    def x(self):
+        return self.position.x
+    @property
+    def y(self):
+        return self.position.y
     def move(self,x,y):
         pass
 
 
 class Tile():
-    def __init__(self, x, y, char = '.', color = libtcod.lightest_grey):
+    def __init__(self, x, y, char = '.', color = libtcod.lightest_grey, back = libtcod.BKGND_NONE):
         self.position = Position(x, y)
         self.contents = []
         self.explored = False
+        self.back = libtcod.BKGND_NONE
+        self.visual = Visual(char, color)
+
     def add(self, item):
         self.contents.append(item)
+
     def remove(self,item):
         self.contents.remove(item)
+
+    def getItem(self, item):
+        for x in self.contents:
+            if x is item:
+                return x
+                break
+        return None
+
+    def getItemType(self, type):
+        for x in self.contents:
+            if isinstance(x, type):
+                return x
+                break
+        return None
+
     @property
-    def visual(self):
+    def x(self):
+        return self.position.x
+    @property
+    def y(self):
+        return self.position.y
+    @property
+    def char(self):
         char = self.visual.char
+        if self.containsPlayer:
+            char = self.getItemType(Player).visual.char
         return char
     @property
     def containsPlayer(self):
@@ -139,6 +171,7 @@ class Tile():
                 playerInside = True
                 break
         return playerInside
+
 
 
 # Exercise
@@ -154,5 +187,7 @@ if __name__ == '__main__':
     t = z.index[(0,0)]
     t.add(p)
     print t.contents, t.containsPlayer
+    print t.getItemType(Player)
     t.remove(p)
     print t.contents, t.containsPlayer
+    print t.getItem(p)
