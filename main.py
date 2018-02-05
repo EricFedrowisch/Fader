@@ -4,10 +4,11 @@ import continuum as continuum
 #actual size of the window
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
-TITLE = 'Fader v.0.1'
+TITLE = 'Fader v.0.2' # "Now with time and space!"
 
 class game():
     def __init__(self):
+        self.debug = False
         self.exit = False
         #Initialize Continuum
         zone = continuum.Zone()
@@ -53,8 +54,9 @@ class game():
         turn += "Target Timeframe: " + str(self.targetTurn)
         self.con_print(string = turn)
         self.con_print(y=(SCREEN_HEIGHT-2), string = self.continuum.timeline())
-        self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
-        self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
+        if self.debug:
+            self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
+            self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
 
 
     def drawMap(self):
@@ -93,31 +95,18 @@ class game():
             elif key.c == ord('e') or key.c == ord('E'):
                 self.continuum.changeTargetTimeframe(-1)
             elif key.c == ord('i') or key.c == ord('I'):
-                self.continuum.state(verbose = True)
+                self.debug = not self.debug
             '''
-            elif key.c == ord('w'):
+            elif key.c == ord('w') or libtcod.console_is_key_pressed(libtcod.KEY_UP):
                 playery -= 1
-            elif key.c == ord('s'):
+            elif key.c == ord('s') or libtcod.console_is_key_pressed(libtcod.KEY_DOWN)::
                 playery += 1
-            elif key.c == ord('a'):
+            elif key.c == ord('a') or libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
                 playerx -= 1
-            elif key.c == ord('d'):
+            elif key.c == ord('d') or libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
                 playerx += 1
             '''
         return turnTaken
-        '''# Arrow movement keys
-        if libtcod.console_is_key_pressed(libtcod.KEY_UP):
-            playery -= 1
-
-        elif libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
-            playery += 1
-
-        elif libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-            playerx -= 1
-
-        elif libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-            playerx += 1
-        '''
 
     def drawHelp(self):
         pass

@@ -1,8 +1,9 @@
-# Fader v.0.1
+# Fader v.0.2 # "Now with time and space!"
 # Time travel roguelike tech demo
 # Written by Eric Fedrowisch. All rights reserved.
 
 import libtcodpy as libtcod
+from components import *
 
 # Container class for timeframes
 class Continuum():
@@ -14,7 +15,6 @@ class Continuum():
         self.time_jaunt_length = 25 # How many turns max can you go back to from LEP
         self.targetTimeframe = self.focalTimeframe
 
-    #TODO: Fix Next Turn Logic
     def nextTurn(self):
         self.timeframes[self.focalTimeframe].play()
         if self.targetTimeframe != self.focalTimeframe:
@@ -34,8 +34,6 @@ class Continuum():
         self.targetTimeframe = self.focalTimeframe
 
     def indexInBounds(self, turn):
-        #n = turns + self.focalTimeframe
-        #print "Inbounds Check: n = ", n, n >= 0 and n < len(self.timeframes), "Turns = ", turns
         return turn >= 0 and turn < len(self.timeframes)
 
     def changeTargetTimeframe(self, amount):
@@ -77,38 +75,70 @@ class Continuum():
         turns = []
         for t in self.timeframes:
             turns.insert(0,t.turn)
-        #turns = turns.reverse()
         return str(turns)
 
 # zone and event container
 class Timeframe():
     def __init__(self, Continuum, turn, PreviousFrame = None):
         self.turn = turn
-        self.zone = None
+        self.zoneStart = None
+        self.zoneEnd = None
         if PreviousFrame:
-            self.zone = PreviousFrame.zone
+            self.zoneStart = PreviousFrame.zoneEnd
+        self.eventQueue = []
     def play(self):
         # Play/Replay turn, noting any changes, checking for collisons/paradoxes
-        print("Playing turn " + str(self.turn))
+        for event in self.eventQueue:
+            event.resolve()
 
 class Zone():
     def __init__(self, xSize = 20, ySize = 20):
         self.zoneMap = []
+        self.index = dict() # Zone dict for lookup by (x,y) tuple
+        self.xSize, self.ySize = xSize, ySize
         for y in range(0, ySize):
             for x in range(0, xSize):
                 self.zoneMap.append(Tile(x, y))
+        for t in self.zoneMap:
+            self.index[(t.position.x,t.position.y)] = t
 
-class Object():
-    def __init__(self, x, y, char = '.', color = libtcod.lightest_grey):
-        self.x, self.y = x, y
-        self.char = char
-        self.color = color
+class Event():
+    def __init__(self, timeframe, string):
+        self.timeframe = timeframe
+        self.string = string
+    def resolve(self,timeframe):
+        pass
 
-class Tile(Object):
+class Player():
+    def __init__(self, x, y, timeClone = False):
+        self.position = Position(x, y)
+        self.visual = Visual(char = "@", color = libtcod.red)
+        self.timeClone = timeClone
+    def move(self,x,y):
+        pass
+
+
+class Tile():
     def __init__(self, x, y, char = '.', color = libtcod.lightest_grey):
-        Object.__init__(self, x, y, char, color)
+        self.position = Position(x, y)
         self.contents = []
         self.explored = False
+    def add(self, item):
+        self.contents.append(item)
+    def remove(self,item):
+        self.contents.remove(item)
+    @property
+    def visual(self):
+        char = self.visual.char
+        return char
+    @property
+    def containsPlayer(self):
+        playerInside = False
+        for x in self.contents:
+            if isinstance(x, Player):
+                playerInside = True
+                break
+        return playerInside
 
 
 # Exercise
@@ -118,19 +148,11 @@ if __name__ == '__main__':
     print "#####After advancing 30 turns...######"
     for i in range(0,30):
         c.nextTurn()
-    c.state(verbose = True)
-    c.travelBack(15)
-    for i in range(0,10):
-        c.state()
-        c.nextTurn()
-    c.state(verbose = True)
-    c.travelForward(15)
-    c.state(verbose = True)
-    c.travelBack(25)
-    c.state(verbose = True)
-    c.travelForward(3)
-    c.state(verbose = True)
-    for i in range(0,10):
-        c.state()
-        c.nextTurn()
-    c.state(verbose = True)
+    print c.state(verbose = True)
+    z = Zone()
+    p = Player(0,0)
+    t = z.index[(0,0)]
+    t.add(p)
+    print t.contents, t.containsPlayer
+    t.remove(p)
+    print t.contents, t.containsPlayer
