@@ -14,8 +14,15 @@ class Continuum():
         self.focalTimeframe = 0 # Initially focus is on leading edge of present
         self.time_jaunt_length = 25 # How many turns max can you go back to from LEP
         self.targetTimeframe = self.focalTimeframe
+        self.messageQueue = []
+
+    def placeObject(self, obj, position, timeframe):
+        frame = self.timeframes[timeframe]
+        tile = frame.zone.index[position]
+        tile.add(obj)
 
     def nextTurn(self):
+        self.messageQueue = []
         self.timeframes[self.focalTimeframe].play()
         if self.targetTimeframe != self.focalTimeframe:
             self.focalTimeframe = self.targetTimeframe
@@ -42,11 +49,10 @@ class Continuum():
             self.targetTimeframe = target
 
     def timeline(self):
-        tLen = len(self.timeframes)
         timeBar = []
-        for i in range(0,tLen):
+        for i in range(0, len(self.timeframes)):
             timeBar.append('o')
-        if tLen < 25:
+        if len(self.timeframes) < 25:
             for i in range(len(timeBar),25):
                 timeBar.append('.')
         timeBar[self.focalTimeframe] = '@'
@@ -80,6 +86,7 @@ class Continuum():
 # zone and event container
 class Timeframe():
     def __init__(self, Continuum, turn, PreviousFrame = None):
+        self.continuum = Continuum
         self.turn = turn
         self.zone = None
         if PreviousFrame:
@@ -102,15 +109,17 @@ class Zone():
             self.index[(t.position.x,t.position.y)] = t
 
 class Event():
-    def __init__(self, timeframe, string):
+    def __init__(self, timeframe, string = None):
         self.timeframe = timeframe
         self.string = string
     def resolve(self,timeframe):
-        pass
+        if self.string:
+            self.timeframe.continuum.messageQueue.append(self.string) # Ugly
+
 
 class Player():
-    def __init__(self, x, y, timeClone = False):
-        self.position = Position(x, y)
+    def __init__(self, position, timeClone = False):
+        self.position = Position(position[0], position[1]) # TODO: Cleanup here
         self.visual = Visual(char = "@", color = libtcod.red)
         self.timeClone = timeClone
     @property
@@ -151,6 +160,14 @@ class Tile():
                 break
         return None
 
+    def containsPlayer(self):
+        playerInside = False
+        for x in self.contents:
+            if isinstance(x, Player):
+                playerInside = True
+                break
+        return playerInside
+
     @property
     def x(self):
         return self.position.x
@@ -160,17 +177,9 @@ class Tile():
     @property
     def char(self):
         char = self.visual.char
-        if self.containsPlayer:
+        if self.containsPlayer():
             char = self.getItemType(Player).visual.char
         return char
-    @property
-    def containsPlayer(self):
-        playerInside = False
-        for x in self.contents:
-            if isinstance(x, Player):
-                playerInside = True
-                break
-        return playerInside
 
 
 
@@ -189,5 +198,5 @@ if __name__ == '__main__':
     print t.contents, t.containsPlayer
     print t.getItemType(Player)
     t.remove(p)
-    print t.contents, t.containsPlayer
+    print t.contents, t.containsPlayer()
     print t.getItem(p)

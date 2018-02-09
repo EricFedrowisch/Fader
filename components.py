@@ -18,3 +18,14 @@ class Visual():
             self.color = color
         else:
             self.color = libtcod.lightest_grey
+
+class Move():
+    def __init__(self, object, initial_pos, end_pos):
+        self.object = object
+        self.initial_pos = Position(x = initial_pos[0], y = initial_pos[1])
+        self.end_pos = Position(x = end_pos[0], y = end_pos[1])
+
+class Pickup():
+    def __init__(self, actor, item):
+        self.actor = actor
+        self.item = item

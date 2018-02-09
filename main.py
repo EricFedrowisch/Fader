@@ -1,5 +1,5 @@
 import libtcodpy as libtcod
-import continuum as continuum
+from continuum import *
 
 #actual size of the window
 SCREEN_WIDTH = 80
@@ -11,8 +11,10 @@ class game():
         self.debug = False
         self.exit = False
         #Initialize Continuum
-        zone = continuum.Zone()
-        self.continuum = continuum.Continuum(zone)
+        zone = Zone()
+        self.continuum = Continuum(zone)
+        self.player = Player((10,10))
+        self.continuum.placeObject(self.player, (10,10), self.continuum.focalTimeframe)
         # Initialize Console
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         self.con  = libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, False)
