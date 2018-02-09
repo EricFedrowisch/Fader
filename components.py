@@ -1,4 +1,4 @@
-# Fader v.0.2 # "Now with time and space!"
+# Fader v.0.2.1 # "Now with time and space!"
 # Time travel roguelike tech demo
 # Written by Eric Fedrowisch. All rights reserved.
 

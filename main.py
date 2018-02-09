@@ -4,7 +4,7 @@ from continuum import *
 #actual size of the window
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
-TITLE = 'Fader v.0.2' # "Now with time and space!"
+TITLE = 'Fader v.0.2.1' # "Now with time and space!"
 
 class game():
     def __init__(self):
@@ -20,6 +20,7 @@ class game():
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         self.con  = libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, False)
         # Do main loop
+        self.textQueue = []
         self.main()
 
     @property
@@ -51,15 +52,24 @@ class game():
         self.drawMap()
         libtcod.console_flush()
 
+    # TODO: Make more elegant and scalable, add event message Queue output
     def drawUI(self):
-        turn = "Timeframe Turn: " + str(self.timeframe.turn) + ' '
-        turn += "Focal Timeframe: " + str(self.focalTurn) + ' '
-        turn += "Target Timeframe: " + str(self.targetTurn)
-        self.con_print(string = turn)
-        self.con_print(y=(SCREEN_HEIGHT-2), string = self.continuum.timeline())
+        turn = "Timeframe Turn: " + str(self.timeframe.turn) + ' ' \
+        + "Focal Timeframe: " + str(self.focalTurn) + ' ' \
+        + "Target Timeframe: " + str(self.targetTurn)
+        self.textQueue = []
+        self.textQueue.extend([self.continuum.timeline(), turn])
         if self.debug:
-            self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
-            self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
+            self.textQueue.extend([self.continuum.state(verbose = True), self.continuum.turnContents()])
+        y = (SCREEN_HEIGHT/2) + (self.timeframe.zone.ySize/2)
+        for text in self.textQueue:
+            x = SCREEN_WIDTH/2 - len(text)/2
+            y = self.con_print(x, y + 1, text)
+        #self.con_print(string = turn)
+        #self.con_print(y=(SCREEN_HEIGHT-2), string = self.continuum.timeline())
+        #if self.debug:
+        #    self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
+        #    self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
 
 
     def drawMap(self):
