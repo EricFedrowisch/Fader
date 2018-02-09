@@ -63,10 +63,13 @@ class game():
 
 
     def drawMap(self):
+        xAdj = (SCREEN_WIDTH/2) - (self.timeframe.zone.xSize/2)
+        yAdj = (SCREEN_HEIGHT/2) - (self.timeframe.zone.ySize/2)
         for tile in self.zone:
             libtcod.console_set_default_foreground(self.con, tile.color)
-            libtcod.console_put_char(self.con, tile.x, tile.y, tile.char, tile.back)
+            libtcod.console_put_char(self.con, (tile.x + xAdj), (tile.y + yAdj), tile.char, tile.back)
 
+    # TODO: Imp more sophisticated word wrap
     def con_print(self, x = 0, y=(SCREEN_HEIGHT-1), string = '', Color = None):
         if Color:
             libtcod.console_set_default_foreground(self.con, Color)
@@ -77,6 +80,7 @@ class game():
             libtcod.console_put_char(self.con, x, y, char, libtcod.BKGND_NONE)
             if x >= (SCREEN_WIDTH - 1): #Really simplistic word wrap
                 x,y = 0, y+1
+        return y # Return last line drawn to
 
     def handle_keys(self):
         turnTaken = False

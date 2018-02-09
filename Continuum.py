@@ -187,8 +187,6 @@ class Tile():
             color = self.getItemType(Player).visual.color
         return color
 
-
-
 # Exercise
 if __name__ == '__main__':
     c = Continuum()
