@@ -26,9 +26,9 @@ class Continuum():
         tile = frame.zone.index[position]
         tile.remove(obj)
 
-    def moveObject(self, obj, position, timeframe):
-        self.placeObject(obj, position, timeframe)
-        self.removeObject(obj, position, timeframe)
+    def moveObject(self, obj, startPos, timeFrom, endPos, timeGo,):
+        self.placeObject(obj, startPos, timeGo)
+        self.removeObject(obj, endPos, timeFrom)
 
     def nextTurn(self):
         self.messageQueue = []
@@ -163,8 +163,9 @@ class Player():
                     msg = "Player stood still."
                 else:
                     msg = "Player moved to " + str((x,y)) + '.'
-            self.continuum.placeObject(self, (x,y), self.continuum.targetTimeframe)
-            self.continuum.removeObject(self,(self.x, self.y), self.continuum.focalTimeframe)
+            self.continuum.moveObject(self, (x,y), self.continuum.targetTimeframe, (self.x, self.y), self.continuum.focalTimeframe)
+            #self.continuum.placeObject(self, (x,y), self.continuum.targetTimeframe)
+            #self.continuum.removeObject(self,(self.x, self.y), self.continuum.focalTimeframe)
             self.x, self.y = x, y
         self.continuum.timeframe.eventQueue.append(Event(self.continuum.timeframe, msg))
             # If square not blocked:
