@@ -21,6 +21,15 @@ class Continuum():
         tile = frame.zone.index[position]
         tile.add(obj)
 
+    def removeObject(self, obj, position, timeframe):
+        frame = self.timeframes[timeframe]
+        tile = frame.zone.index[position]
+        tile.remove(obj)
+
+    def moveObject(self, obj, position, timeframe):
+        self.placeObject(obj, position, timeframe)
+        self.removeObject(obj, position, timeframe)
+
     def nextTurn(self):
         self.messageQueue = []
         self.timeframes[self.focalTimeframe].play()
@@ -83,6 +92,13 @@ class Continuum():
             turns.insert(0,t.turn)
         return str(turns)
 
+    @property
+    def zone(self):
+        return self.timeframes[self.focalTimeframe].zone
+    @property
+    def timeframe(self):
+        return self.timeframes[self.focalTimeframe]
+
 # zone and event container
 class Timeframe():
     def __init__(self, Continuum, turn, PreviousFrame = None):
@@ -112,13 +128,14 @@ class Event():
     def __init__(self, timeframe, string = None):
         self.timeframe = timeframe
         self.string = string
-    def resolve(self,timeframe):
+    def resolve(self):
         if self.string:
             self.timeframe.continuum.messageQueue.append(self.string) # Ugly
 
 
 class Player():
-    def __init__(self, position, timeClone = False):
+    def __init__(self, position, continuum, timeClone = False):
+        self.continuum = continuum
         self.position = Position(position[0], position[1]) # TODO: Cleanup here
         self.visual = Visual(char = "@", color = libtcod.red)
         self.timeClone = timeClone
@@ -128,8 +145,32 @@ class Player():
     @property
     def y(self):
         return self.position.y
-    def move(self,x,y):
-        pass
+
+    def move(self, dx = 0, dy = 0): # Given int x,y in range (-1,1)
+        x, y = self.x + dx, self.y + dy
+        tile, msg = None, ''
+        zone = self.continuum.zone
+        if (x,y) in zone.index:  # If square exists:
+            tile = zone.index[(x,y)]
+        else:
+            msg = "Player tried to move to non-existent square:" + str((x,y)) \
+            + ".How ambitious is that!?"
+        if tile:
+            if self.continuum.focalTimeframe != self.continuum.targetTimeframe: # Lateral & Time move event
+                msg = "Player tried to move through time to " + str((x,y)) + '.'
+            else: # Lateral move event
+                if dx == 0 and dy == 0:
+                    msg = "Player stood still."
+                else:
+                    msg = "Player moved to " + str((x,y)) + '.'
+            self.continuum.placeObject(self, (x,y), self.continuum.targetTimeframe)
+            self.continuum.removeObject(self,(self.x, self.y), self.continuum.focalTimeframe)
+            self.x, self.y = x, y
+        self.continuum.timeframe.eventQueue.append(Event(self.continuum.timeframe, msg))
+            # If square not blocked:
+
+
+        # Leave time clone
 
 
 class Tile():

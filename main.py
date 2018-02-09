@@ -14,7 +14,7 @@ class game():
         zone = Zone()
         self.continuum = Continuum(zone)
         pos = (10,10)
-        self.player = Player(pos)
+        self.player = Player(pos, continuum = self.continuum)
         self.continuum.placeObject(self.player, pos, self.continuum.focalTimeframe)
         # Initialize Console
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
@@ -52,7 +52,6 @@ class game():
         self.drawMap()
         libtcod.console_flush()
 
-    # TODO: Make more elegant and scalable, add event message Queue output
     def drawUI(self):
         turn = "Timeframe Turn: " + str(self.timeframe.turn) + ' ' \
         + "Focal Timeframe: " + str(self.focalTurn) + ' ' \
@@ -62,15 +61,10 @@ class game():
         if self.debug:
             self.textQueue.extend([self.continuum.state(verbose = True), self.continuum.turnContents()])
         y = (SCREEN_HEIGHT/2) + (self.timeframe.zone.ySize/2)
+        self.textQueue.extend(self.continuum.messageQueue)
         for text in self.textQueue:
             x = SCREEN_WIDTH/2 - len(text)/2
             y = self.con_print(x, y + 1, text)
-        #self.con_print(string = turn)
-        #self.con_print(y=(SCREEN_HEIGHT-2), string = self.continuum.timeline())
-        #if self.debug:
-        #    self.con_print(y=(SCREEN_HEIGHT-3), string = self.continuum.state(verbose = True))
-        #    self.con_print(y=(SCREEN_HEIGHT-4), string = self.continuum.turnContents())
-
 
     def drawMap(self):
         xAdj = (SCREEN_WIDTH/2) - (self.timeframe.zone.xSize/2)
@@ -79,7 +73,6 @@ class game():
             libtcod.console_set_default_foreground(self.con, tile.color)
             libtcod.console_put_char(self.con, (tile.x + xAdj), (tile.y + yAdj), tile.char, tile.back)
 
-    # TODO: Imp more sophisticated word wrap
     def con_print(self, x = 0, y=(SCREEN_HEIGHT-1), string = '', Color = None):
         if Color:
             libtcod.console_set_default_foreground(self.con, Color)
@@ -97,32 +90,45 @@ class game():
 
         key = libtcod.console_wait_for_keypress(True)
 
-        #Alt+Enter: toggle fullscreen
+        # Alt+Enter: toggle fullscreen
         if key.vk == libtcod.KEY_ENTER and (key.lalt or key.ralt):
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
-
+        # Exit game
         elif key.vk == libtcod.KEY_ESCAPE:
             self.exit = True  #exit game
-
-        elif key.vk == libtcod.KEY_SPACE: #Wait turn
+        # Pass Turn
+        elif key.vk == libtcod.KEY_SPACE:
             turnTaken = True
+            self.player.move(dx = 0, dy = 0)
         elif key.vk == libtcod.KEY_CHAR:
+            # Timeframe targeting
             if key.c == ord('q') or key.c == ord('Q'):
                 self.continuum.changeTargetTimeframe(1)
             elif key.c == ord('e') or key.c == ord('E'):
                 self.continuum.changeTargetTimeframe(-1)
+            # MOVEMENT
+            elif key.c == ord('w') or key.c == ord('W') or \
+            libtcod.console_is_key_pressed(libtcod.KEY_UP):
+                turnTaken = True
+                self.player.move(dx = 0, dy = -1) #player y -= 1
+            elif key.c == ord('s') or key.c == ord('S') or \
+            libtcod.console_is_key_pressed(libtcod.KEY_DOWN):
+                turnTaken = True
+                self.player.move(dx = 0, dy = 1) #player y += 1
+            elif key.c == ord('a') or key.c == ord('A') or \
+            libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
+                turnTaken = True
+                self.player.move(dx = -1, dy = 0) #player x -= 1
+            elif key.c == ord('d') or  key.c == ord('D') or \
+            libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
+                turnTaken = True
+                self.player.move(dx = 1, dy = 0) #player x += 1
+            # Debug keys
             elif key.c == ord('i') or key.c == ord('I'):
                 self.debug = not self.debug
-            '''
-            elif key.c == ord('w') or libtcod.console_is_key_pressed(libtcod.KEY_UP):
-                playery -= 1
-            elif key.c == ord('s') or libtcod.console_is_key_pressed(libtcod.KEY_DOWN)::
-                playery += 1
-            elif key.c == ord('a') or libtcod.console_is_key_pressed(libtcod.KEY_LEFT):
-                playerx -= 1
-            elif key.c == ord('d') or libtcod.console_is_key_pressed(libtcod.KEY_RIGHT):
-                playerx += 1
-            '''
+            elif key.c == ord('p') or key.c == ord('P'):
+                turnTaken = True
+                self.player.move(dx = -100, dy = -100)
         return turnTaken
 
     def drawHelp(self):
