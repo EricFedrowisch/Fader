@@ -180,6 +180,12 @@ class Tile():
         if self.containsPlayer():
             char = self.getItemType(Player).visual.char
         return char
+    @property
+    def color(self):
+        color = self.visual.color
+        if self.containsPlayer():
+            color = self.getItemType(Player).visual.color
+        return color
 
 
 

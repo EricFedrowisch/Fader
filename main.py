@@ -13,8 +13,9 @@ class game():
         #Initialize Continuum
         zone = Zone()
         self.continuum = Continuum(zone)
-        self.player = Player((10,10))
-        self.continuum.placeObject(self.player, (10,10), self.continuum.focalTimeframe)
+        pos = (10,10)
+        self.player = Player(pos)
+        self.continuum.placeObject(self.player, pos, self.continuum.focalTimeframe)
         # Initialize Console
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         self.con  = libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, False)
@@ -63,7 +64,7 @@ class game():
 
     def drawMap(self):
         for tile in self.zone:
-            libtcod.console_set_default_foreground(self.con, tile.visual.color)
+            libtcod.console_set_default_foreground(self.con, tile.color)
             libtcod.console_put_char(self.con, tile.x, tile.y, tile.char, tile.back)
 
     def con_print(self, x = 0, y=(SCREEN_HEIGHT-1), string = '', Color = None):
