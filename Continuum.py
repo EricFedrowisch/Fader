@@ -115,13 +115,13 @@ class Timeframe():
 
 class Zone():
     def __init__(self, xSize = 20, ySize = 20):
-        self.zoneMap = []
+        self.tileList = []
         self.index = dict() # Zone dict for lookup by (x,y) tuple
         self.xSize, self.ySize = xSize, ySize
         for y in range(0, ySize):
             for x in range(0, xSize):
-                self.zoneMap.append(Tile(x, y))
-        for t in self.zoneMap:
+                self.tileList.append(Tile(x, y))
+        for t in self.tileList:
             self.index[(t.position.x,t.position.y)] = t
 
 class Event():

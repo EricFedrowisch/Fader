@@ -25,7 +25,7 @@ class game():
 
     @property
     def timeframe(self):
-        return self.continuum.timeframes[self.continuum.focalTimeframeIndex]
+        return self.continuum.timeframe#s[self.continuum.focalTimeframeIndex]
     @property
     def focalTimeframeIndex(self):
         return self.continuum.focalTimeframeIndex
@@ -34,7 +34,7 @@ class game():
         return self.continuum.timeframes[self.continuum.targetTimeframeIndex].turn
     @property
     def zone(self):
-        return self.timeframe.zone.zoneMap
+        return self.timeframe.zone
 
     def main(self):
         while not libtcod.console_is_window_closed() and self.exit != True:
@@ -57,16 +57,16 @@ class game():
         self.textQueue.extend([self.continuum.timeline(), turn])
         if self.debug:
             self.textQueue.extend([self.continuum.state(verbose = True), self.continuum.turnContents()])
-        y = (SCREEN_HEIGHT/2) + (self.timeframe.zone.ySize/2)
+        y = (SCREEN_HEIGHT/2) + (self.zone.ySize/2)
         self.textQueue.extend(self.continuum.messageQueue)
         for text in self.textQueue:
             x = SCREEN_WIDTH/2 - len(text)/2
             y = self.con_print(x, y + 1, text)
 
     def drawMap(self):
-        xAdj = (SCREEN_WIDTH/2) - (self.timeframe.zone.xSize/2)
-        yAdj = (SCREEN_HEIGHT/2) - (self.timeframe.zone.ySize/2)
-        for tile in self.zone:
+        xAdj = (SCREEN_WIDTH/2) - (self.zone.xSize/2)
+        yAdj = (SCREEN_HEIGHT/2) - (self.zone.ySize/2)
+        for tile in self.zone.tileList:
             libtcod.console_set_default_foreground(self.con, tile.color)
             libtcod.console_put_char(self.con, (tile.x + xAdj), (tile.y + yAdj), tile.char, tile.back)
 
