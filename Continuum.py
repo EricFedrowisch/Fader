@@ -11,9 +11,9 @@ class Continuum():
         self.timeframes = []
         self.timeframes.append(Timeframe(self, 0)) #Create inital timeframe
         self.timeframes[0].zone = zone
-        self.focalTimeframe = 0 # Initially focus is on leading edge of present
+        self.focalTimeframeIndex = 0 # Initially focus is on leading edge of present
+        self.targetTimeframeIndex = self.focalTimeframeIndex
         self.time_jaunt_length = 25 # How many turns max can you go back to from LEP
-        self.targetTimeframe = self.focalTimeframe
         self.messageQueue = []
 
     def placeObject(self, obj, position, timeframe):
@@ -32,30 +32,30 @@ class Continuum():
 
     def nextTurn(self):
         self.messageQueue = []
-        self.timeframes[self.focalTimeframe].play()
-        if self.targetTimeframe != self.focalTimeframe:
-            self.focalTimeframe = self.targetTimeframe
-            self.targetTimeframe = self.focalTimeframe
+        self.timeframes[self.focalTimeframeIndex].play()
+        if self.targetTimeframeIndex != self.focalTimeframeIndex:
+            self.focalTimeframeIndex = self.targetTimeframeIndex
+            self.targetTimeframeIndex = self.focalTimeframeIndex
             return
 
-        if self.focalTimeframe == 0: # If focalTimeframe is at LEP...
+        if self.focalTimeframeIndex == 0: # If focalTimeframeIndex is at LEP...
             # Time moves forward from leading edge of present
             if len(self.timeframes) >= self.time_jaunt_length: # If too many timeframes...
                 self.timeframes.pop(-1) # Remove furthest in past timeframe AND
             PreviousFrame = self.timeframes[0]
             NextFrame = Timeframe(self, (PreviousFrame.turn+1), PreviousFrame)
             self.timeframes.insert(0, NextFrame) # Add one more timeframe
-        else: # If focalTimeframe is NOT at LEP...
-            self.focalTimeframe -= 1
-        self.targetTimeframe = self.focalTimeframe
+        else: # If focalTimeframeIndex is NOT at LEP...
+            self.focalTimeframeIndex -= 1
+        self.targetTimeframeIndex = self.focalTimeframeIndex
 
     def indexInBounds(self, turn):
         return turn >= 0 and turn < len(self.timeframes)
 
-    def changeTargetTimeframe(self, amount):
-        target = self.targetTimeframe + amount
+    def changetargetTimeframeIndex(self, amount):
+        target = self.targetTimeframeIndex + amount
         if self.indexInBounds(target):
-            self.targetTimeframe = target
+            self.targetTimeframeIndex = target
 
     def timeline(self):
         timeBar = []
@@ -64,9 +64,9 @@ class Continuum():
         if len(self.timeframes) < 25:
             for i in range(len(timeBar),25):
                 timeBar.append('.')
-        timeBar[self.focalTimeframe] = '@'
-        if self.targetTimeframe != self.focalTimeframe:
-            timeBar[self.targetTimeframe] = 'X'
+        timeBar[self.focalTimeframeIndex] = '@'
+        if self.targetTimeframeIndex != self.focalTimeframeIndex:
+            timeBar[self.targetTimeframeIndex] = 'X'
         timeBar = timeBar[::-1] # Reverse timeBar
         timeBar.insert(0,'Time Gauge: (|')
         timeBar.append('|)')
@@ -76,14 +76,14 @@ class Continuum():
     def state(self, verbose = False):
         state = ''
         if not verbose:
-            state = state + "| " + str(self.focalTimeframe) \
+            state = state + "| " + str(self.focalTimeframeIndex) \
             + " turns from LEP. " +  " | Current turn is " \
-            + str(self.timeframes[self.focalTimeframe].turn)
+            + str(self.timeframes[self.focalTimeframeIndex].turn)
         else:
-            state = state + "| " + str(self.focalTimeframe) \
+            state = state + "| " + str(self.focalTimeframeIndex) \
             + " turns from LEP. " + " | Current turn is " \
-            + str(self.timeframes[self.focalTimeframe].turn)\
-            + " | Time advancing? " +  str(self.focalTimeframe == 0) + " | "
+            + str(self.timeframes[self.focalTimeframeIndex].turn)\
+            + " | Time advancing? " +  str(self.focalTimeframeIndex == 0) + " | "
         return state
 
     def turnContents(self):
@@ -94,10 +94,10 @@ class Continuum():
 
     @property
     def zone(self):
-        return self.timeframes[self.focalTimeframe].zone
+        return self.timeframes[self.focalTimeframeIndex].zone
     @property
     def timeframe(self):
-        return self.timeframes[self.focalTimeframe]
+        return self.timeframes[self.focalTimeframeIndex]
 
 # zone and event container
 class Timeframe():
@@ -156,16 +156,14 @@ class Player():
             msg = "Player tried to move to non-existent square:" + str((x,y)) \
             + ".How ambitious is that!?"
         if tile:
-            if self.continuum.focalTimeframe != self.continuum.targetTimeframe: # Lateral & Time move event
+            if self.continuum.focalTimeframeIndex != self.continuum.targetTimeframeIndex: # Lateral & Time move event
                 msg = "Player tried to move through time to " + str((x,y)) + '.'
             else: # Lateral move event
                 if dx == 0 and dy == 0:
                     msg = "Player stood still."
                 else:
                     msg = "Player moved to " + str((x,y)) + '.'
-            self.continuum.moveObject(self, (x,y), self.continuum.targetTimeframe, (self.x, self.y), self.continuum.focalTimeframe)
-            #self.continuum.placeObject(self, (x,y), self.continuum.targetTimeframe)
-            #self.continuum.removeObject(self,(self.x, self.y), self.continuum.focalTimeframe)
+            self.continuum.moveObject(self, (x,y), self.continuum.targetTimeframeIndex, (self.x, self.y), self.continuum.focalTimeframeIndex)
             self.x, self.y = x, y
         self.continuum.timeframe.eventQueue.append(Event(self.continuum.timeframe, msg))
             # If square not blocked:

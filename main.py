@@ -15,7 +15,7 @@ class game():
         self.continuum = Continuum(zone)
         pos = (10,10)
         self.player = Player(pos, continuum = self.continuum)
-        self.continuum.placeObject(self.player, pos, self.continuum.focalTimeframe)
+        self.continuum.placeObject(self.player, pos, self.continuum.focalTimeframeIndex)
         # Initialize Console
         self.font = libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
         self.con  = libtcod.console_init_root(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, False)
@@ -25,16 +25,13 @@ class game():
 
     @property
     def timeframe(self):
-        return self.continuum.timeframes[self.continuum.focalTimeframe]
+        return self.continuum.timeframes[self.continuum.focalTimeframeIndex]
     @property
-    def focalTimeframe(self):
-        return self.continuum.focalTimeframe
-    @property
-    def focalTurn(self):
-        return self.continuum.timeframes[self.focalTimeframe].turn
+    def focalTimeframeIndex(self):
+        return self.continuum.focalTimeframeIndex
     @property
     def targetTurn(self):
-        return self.continuum.timeframes[self.continuum.targetTimeframe].turn
+        return self.continuum.timeframes[self.continuum.targetTimeframeIndex].turn
     @property
     def zone(self):
         return self.timeframe.zone.zoneMap
@@ -54,7 +51,7 @@ class game():
 
     def drawUI(self):
         turn = "Timeframe Turn: " + str(self.timeframe.turn) + ' ' \
-        + "Focal Timeframe: " + str(self.focalTurn) + ' ' \
+        + "Focal Timeframe: " + str(self.continuum.focalTimeframeIndex) + ' ' \
         + "Target Timeframe: " + str(self.targetTurn)
         self.textQueue = []
         self.textQueue.extend([self.continuum.timeline(), turn])
@@ -103,9 +100,9 @@ class game():
         elif key.vk == libtcod.KEY_CHAR:
             # Timeframe targeting
             if key.c == ord('q') or key.c == ord('Q'):
-                self.continuum.changeTargetTimeframe(1)
+                self.continuum.changetargetTimeframeIndex(1)
             elif key.c == ord('e') or key.c == ord('E'):
-                self.continuum.changeTargetTimeframe(-1)
+                self.continuum.changetargetTimeframeIndex(-1)
             # MOVEMENT
             elif key.c == ord('w') or key.c == ord('W') or \
             libtcod.console_is_key_pressed(libtcod.KEY_UP):
